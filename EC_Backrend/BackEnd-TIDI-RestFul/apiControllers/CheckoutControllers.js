@@ -1,24 +1,123 @@
 var express = require("express");
 var verifier = require("email-verify");
+var checkoutRepo = require("../repos/CheckoutRepo");
 var userRepo = require("../repos/userRepo");
-var authRepo = require("../repos/authRepo");
 var verifyStaff = require("../repos/staffRepo").verifyStaff;
 
 var router = express.Router();
 
-router.get("/", verifyStaff, (req, res) => {
-    userRepo
-        .list()
-        .then(rows => {
-            res.json({
-                users: rows
-            });
+router.post("/couponStatus", verifyStaff, (req, res) => {
+    console.log(req.body);
+    checkoutRepo
+        .getCouponStatus(req.body.coupon)
+        .then(coupon => {
+            console.log(coupon);
+            if (coupon) {
+                if ((coupon.active = "TRUE")) {
+                    coupon.status = 1;
+                } else {
+                    coupon.status = 0;
+                }
+                res.json({
+                    status: coupon.status,
+                    discPercent: coupon.percent,
+                    money: coupon.money
+                });
+            } else {
+                res.json({
+                    status: -1,
+                    discPercent: 0,
+                    money: 0
+                });
+            }
         })
         .catch(err => {
             console.log(err);
             res.statusCode = 500;
             res.end("View error log on console");
         });
+});
+
+router.post("/checkout", verifyStaff, (req, res) => {
+    console.log(req.body);
+    userRepo
+        .getUserByUsername(req.body.username)
+        .then(user => {
+            if (user) {
+                console.log(user);
+                req.body.idAccount = user.id;
+                if (req.body.couponCode && req.body.couponCode !== "") {
+                    checkoutRepo
+                        .getCouponStatus(req.body.coupon)
+                        .then(coupon => {
+                            if (coupon) {
+                                req.body.couponId = coupon.id;
+                                checkoutRepo
+                                    .order(req.body)
+                                    .then(res => {
+                                        console.log(res);
+                                    })
+                                    .catch(err2 => {
+                                        console.log(err2);
+                                    });
+                            } else {
+                                res.json({
+                                    status: false,
+                                    message: "coupon is invalid"
+                                });
+                            }
+                        })
+                        .catch(err1 => {
+                            console.log(err1);
+                            res.json({
+                                status: false,
+                                message: "checkout failure, check coupon code."
+                            });
+                        });
+                } else {
+                }
+            } else {
+                res.json({
+                    status: false,
+                    message: "username is invalid"
+                });
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                status: false,
+                message: "checkout failure, check username."
+            });
+        });
+    // checkoutRepo
+    //     .getCouponStatus(req.body.coupon)
+    //     .then(coupon => {
+    //         console.log(coupon);
+    //         if (coupon) {
+    //             if ((coupon.active = "TRUE")) {
+    //                 coupon.status = 1;
+    //             } else {
+    //                 coupon.status = 0;
+    //             }
+    //             res.json({
+    //                 status: coupon.status,
+    //                 discPercent: coupon.percent,
+    //                 money: coupon.money
+    //             });
+    //         } else {
+    //             res.json({
+    //                 status: -1,
+    //                 discPercent: 0,
+    //                 money: 0
+    //             });
+    //         }
+    //     })
+    //     .catch(err => {
+    //         console.log(err);
+    //         res.statusCode = 500;
+    //         res.end("View error log on console");
+    //     });
 });
 
 router.get("/cart", verifyStaff, (req, res) => {

@@ -11,7 +11,7 @@ router.get("/access", (req, res) => {
     if (refresh_token) {
         authRepo.checkRefreshToken(refresh_token).then(row => {
             if (row) {
-                userRepo.single(row.uid).then(user_info => {
+                userRepo.single(row.id).then(user_info => {
                     res.json({
                         auth: true,
                         access_token: authRepo.generateAccessToken(user_info)

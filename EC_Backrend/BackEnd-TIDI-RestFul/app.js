@@ -6,6 +6,7 @@ var express = require("express"),
 
 var app = express();
 var productCtrl = require("./apiControllers/ProductController");
+var checkoutCtrl = require("./apiControllers/CheckoutControllers");
 var userCtrl = require("./apiControllers/userControllers");
 var accountCtrl = require("./apiControllers/accountControllers");
 var authCtrl = require("./apiControllers/authController");
@@ -27,6 +28,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/product/", productCtrl);
+app.use("/checkout/", checkoutCtrl);
 app.use("/users/", userCtrl);
 app.use("/accounts/", verifyAccessToken, accountCtrl);
 app.use("/auth/", authCtrl);

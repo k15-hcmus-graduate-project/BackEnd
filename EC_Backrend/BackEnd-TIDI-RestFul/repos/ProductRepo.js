@@ -107,13 +107,44 @@ exports.listTree = async query => {
     return res;
 };
 
-exports.single = uid =>
-    kn
+exports.single = async uid => {
+    let pro = await kn
         .from("product")
         .select("*")
         .where("id", parseInt(uid))
         .first();
 
+    if (pro) {
+        let cate = await kn
+            .from("category")
+            .select("*")
+            .where("id", pro.category_id);
+        pro.category = cate;
+
+        let branch = await kn
+            .from("branch")
+            .select("*")
+            .where("id", pro.branch_id);
+        pro.branch = branch;
+
+        let industry = await kn
+            .from("industry")
+            .select("*")
+            .where("id", pro.industry_id);
+        pro.industry = industry;
+
+        let brand = await kn
+            .from("brand")
+            .select("*")
+            .where("id", pro.brand_id);
+
+        pro.brand = brand;
+        pro.status = 200;
+        return pro;
+    }
+    pro.status = 500;
+    return pro;
+};
 // exports.getUserByUsername = username =>
 //     kn("accounts")
 //         .select("username", "permission", "fullName", "email", "dateOfBirth")

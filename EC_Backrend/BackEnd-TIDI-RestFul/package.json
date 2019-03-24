@@ -1,7 +1,7 @@
 {
-    "name": "tidi-backend",
+    "name": "backend",
     "version": "1.0.0",
-    "description": "This is the back-end for TIDI - realtime DB project, will be set up by nodeJS tech and sth other",
+    "description": "This is the back-end for internet banking project, will be set up by nodeJS tech and sth other",
     "main": "app.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,7 +11,7 @@
         "type": "git",
         "url": "git+https://github.com/BockChain-Project/BackEnd-BlockChain-RestFul.git"
     },
-    "author": "Nguyen Dang Quang, Le Hoang Sang",
+    "author": "Nguyen Dang Quang, Tran Duy Phuong, Dang Phuoc Quang",
     "license": "ISC",
     "bugs": {
         "url": "https://github.com/BockChain-Project/BackEnd-BlockChain-RestFul/issues"

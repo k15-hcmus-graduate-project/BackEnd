@@ -46,35 +46,34 @@ exports.generateRefreshToken = () => {
 };
 
 exports.getRefreshToken = uid =>
-    kn("users_token")
-        .select("refresh_token")
-        .where("uid", uid)
+    kn("accounts")
+        .select("refreshToken")
+        .where("id", uid)
         .first();
 
 exports.insertRefreshToken = (uid, refresh_token) => {
-    return kn("users_token")
-        .insert({
-            uid: uid,
-            refresh_token: refresh_token,
-            create_at: moment().format(process.env.DATETIME_FORMAT)
+    return kn("accounts")
+        .update({
+            refreshToken: refresh_token
         })
-        .returning("uid");
+        .where("id", uid)
+        .returning("id");
 };
 
 exports.updateRefreshToken = (uid, refresh_token) => {
-    return kn("users_token")
-        .where("uid", uid)
+    return kn("accounts")
+        .where("id", uid)
         .update(
             {
-                refresh_token: refresh_token,
-                write_at: moment().format(process.env.DATETIME_FORMAT)
+                refreshToken: refresh_token
+                // write_at: moment().format(process.env.DATETIME_FORMAT)
             },
             [uid]
         );
 };
 
 exports.checkRefreshToken = refresh_token =>
-    kn("users_token")
-        .select("uid")
+    kn("accounts")
+        .select("id")
         .where("refresh_token", refresh_token)
         .first();
