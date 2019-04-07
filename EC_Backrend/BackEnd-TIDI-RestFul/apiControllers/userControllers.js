@@ -21,34 +21,88 @@ router.get("/", verifyStaff, (req, res) => {
         });
 });
 
-router.get("/cart", verifyStaff, (req, res) => {
-    console.log("request get cart: ", req.query);
+router.post("/admin", verifyStaff, (req, res) => {
+    console.log("admin get: ", req.body);
     userRepo
-        .getUserByUsername(req.query.username)
-        .then(user => {
-            if (user) {
-                console.log("user cart: ", user);
+        .adminList(req.body)
+        .then(rows => {
+            console.log(rows.length);
+            res.json({
+                totalItems: rows.length,
+                accounts: rows,
+                status: "TRUE",
+                message: "Get danh sách accounts thành công với số lượng " + rows.length
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            res.statusCode = 500;
+            res.json({
+                accounts: [],
+                status: "FALSE",
+                message: "Get danh sách người dùng thất bại. Xin đăng nhập và thử lại."
+            });
+        });
+});
+
+router.post("/admin/add", verifyStaff, (req, res) => {
+    console.log("admin add account: ", req.body);
+    userRepo
+        .getUserByUsername(req.body.username)
+        .then(res0 => {
+            if (res0) {
+                res.json({
+                    message: "Username đã tồn tại.",
+                    status: "FALSE"
+                });
+            } else {
                 userRepo
-                    .listCart(user.id)
-                    .then(rows => {
-                        console.log(rows);
-                        res.json({
-                            products: rows,
-                            status: true
-                        });
+                    .getUserByEmail(req.body.email)
+                    .then(res1 => {
+                        if (res1) {
+                            res.json({
+                                message: "Email đã tồn tại.",
+                                status: "FALSE"
+                            });
+                        } else {
+                            userRepo
+                                .add(req.body)
+                                .then(res2 => {
+                                    if (res2) {
+                                        res.json({
+                                            status: "TRUE",
+                                            message: "Thêm người dùng thành công"
+                                        });
+                                    } else {
+                                        res.json({
+                                            status: "FALSE",
+                                            message: "Có lỗi khi thêm người dùng. Vui lòng nhập đầy đủ thông tin."
+                                        });
+                                    }
+                                })
+                                .catch(err2 => {
+                                    res.json({
+                                        message: "Có lỗi khi thêm người dùng. Xin thử  lại với thông tin đầy đủ hơn.",
+                                        status: "FALSE"
+                                    });
+                                });
+                        }
                     })
-                    .catch(err => {
-                        console.log(err);
-                        res.statusCode = 500;
-                        res.end("View error log on console");
+                    .catch(err1 => {
+                        res.json({
+                            status: "FALSE"
+                        });
                     });
             }
         })
         .catch(err => {
-            console.log(err);
+            res.json({
+                status: "FALSE",
+                message: "Có lỗi khi thêm người dùng. Xin thử  lại với thông tin đầy đủ hơn."
+            });
         });
 });
-router.post("/", (req, res) => {
+router.post("/", verifyStaff, (req, res) => {
     console.log(req.body);
     userRepo
         .getUserByUsername(req.body.username)
@@ -89,142 +143,35 @@ router.post("/", (req, res) => {
         });
 });
 
-router.post("/cart", (req, res) => {
+router.put("/admin", verifyStaff, (req, res) => {
     console.log(req.body);
+    const id = req.body.id;
+    delete req.body.id;
     userRepo
-        .getUserByUsername(req.body.username)
+        .update(id, req.body)
         .then(row => {
             if (row) {
-                const idAccount = row.id;
-                userRepo
-                    .getCartByAccAndPro(idAccount, req.body.productId)
-                    .then(cartItem => {
-                        console.log(cartItem);
-                        if (cartItem) {
-                            console.log("update cart ");
-                            userRepo
-                                .updateCart(cartItem, parseInt(req.body.amount))
-                                .then(effect => {
-                                    console.log(effect);
-                                    res.statusCode = 200;
-                                    res.json({
-                                        status: true,
-                                        code: 200,
-                                        msg: `update cart successful with id: ` + cartItem.accounts_id
-                                    });
-                                })
-                                .catch(err2 => {
-                                    console.log(err2);
-                                    res.statusCode = 403;
-                                    res.json({
-                                        status: false,
-                                        code: 403,
-                                        msg: `update cart failed with code 403!`
-                                    });
-                                });
-                        } else {
-                            console.log("insert cart");
-                            userRepo
-                                .insertCart(idAccount, req.body.productId, req.body.amount)
-                                .then(uid => {
-                                    res.status = 200;
-                                    res.json({
-                                        status: true,
-                                        code: 200,
-                                        msg: `insert cart successful with id: ` + uid
-                                    });
-                                })
-                                .catch(err3 => {
-                                    res.statusCode = 403;
-                                    res.json({
-                                        status: false,
-                                        code: 403,
-                                        msg: `insert cart failed with code 403!`
-                                    });
-                                    console.log(err3);
-                                });
-                        }
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        res.statusCode = 403;
-                        res.json({
-                            status: false,
-                            code: 403,
-                            msg: `Username is already used!`
-                        });
-                    });
+                console.log(row);
+                res.statusCode = 200;
+                res.json({
+                    code: 200,
+                    status: "TRUE",
+                    message: "Update accounts success with status code 200."
+                });
             } else {
                 console.log(err);
-                res.statusCode = 403;
                 res.json({
                     status: false,
-                    code: 403,
-                    msg: `Username is invalid!`
+                    message: "Update account fail! Check your data and try again!"
                 });
             }
         })
         .catch(err => {
             console.log(err);
-            res.statusCode = 500;
-            res.end("View error log on console");
-        });
-});
-
-router.put("/cart", (req, res) => {
-    console.log("Update cart item with user: ", req.body.username);
-    userRepo
-        .getUserByUsername(req.body.username)
-        .then(row => {
-            if (row) {
-                const idAccount = row.id;
-                userRepo
-                    .getCartByAccAndPro(idAccount, req.body.productId)
-                    .then(cartItem => {
-                        console.log(cartItem);
-                        if (cartItem) {
-                            console.log("update cart ");
-                            userRepo
-                                .updateCart(cartItem, parseInt(req.body.amount))
-                                .then(effect => {
-                                    console.log(effect);
-                                    res.statusCode = 200;
-                                    res.json({
-                                        code: 200,
-                                        msg: `update cart successful with id: ` + cartItem.accounts_id
-                                    });
-                                })
-                                .catch(err2 => {
-                                    console.log(err2);
-                                    res.statusCode = 403;
-                                    res.json({
-                                        code: 403,
-                                        msg: `update cart failed with code 403!`
-                                    });
-                                });
-                        }
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        res.statusCode = 403;
-                        res.json({
-                            code: 403,
-                            msg: `Username is already used!`
-                        });
-                    });
-            } else {
-                console.log(err);
-                res.statusCode = 403;
-                res.json({
-                    code: 403,
-                    msg: `Username is invalid!`
-                });
-            }
-        })
-        .catch(err => {
-            console.log(err);
-            res.statusCode = 500;
-            res.end("View error log on console");
+            res.json({
+                status: false,
+                message: "Update account fail! Please login and try again!"
+            });
         });
 });
 
@@ -271,26 +218,6 @@ router.post("/login", (req, res) => {
         }
     });
 });
-
-// router.get("/:id", verifyStaff, (req, res) => {
-//     console.log("get user verify: ", req.params);
-//     var id = +req.params.id;
-//     if (id) {
-//         userRepo
-//             .single(id)
-//             .then(row => {
-//                 res.json(row);
-//             })
-//             .catch(err => {
-//                 console.log(err);
-//                 res.statusCode = 500;
-//                 res.end("View error log on console");
-//             });
-//     } else {
-//         res.statusCode = 404;
-//         res.end("Not Found");
-//     }
-// });
 
 router.get("/one/:username", verifyStaff, (req, res) => {
     console.log("get user verify: ", req.params);

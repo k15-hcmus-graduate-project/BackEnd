@@ -8,11 +8,10 @@ var app = express();
 var productCtrl = require("./apiControllers/ProductController");
 var checkoutCtrl = require("./apiControllers/CheckoutControllers");
 var userCtrl = require("./apiControllers/userControllers");
+var cartCtrl = require("./apiControllers/cartControllers");
 var accountCtrl = require("./apiControllers/accountControllers");
 var authCtrl = require("./apiControllers/authController");
-var transferCtrl = require("./apiControllers/transferController");
-var otpCtrl = require("./apiControllers/otpVerificationController");
-var recipientCtrl = require("./apiControllers/recipientController");
+// var otpCtrl = require("./apiControllers/otpVerificationController");
 
 var verifyAccessToken = require("./repos/authRepo").verifyAccessToken;
 
@@ -30,11 +29,10 @@ app.get("/", (req, res) => {
 app.use("/product/", productCtrl);
 app.use("/checkout/", checkoutCtrl);
 app.use("/users/", userCtrl);
+app.use("/cart/", cartCtrl);
 app.use("/accounts/", verifyAccessToken, accountCtrl);
 app.use("/auth/", authCtrl);
-app.use("/transfers/", verifyAccessToken, transferCtrl);
-app.use("/otp/", verifyAccessToken, otpCtrl);
-app.use("/recipients/", verifyAccessToken, recipientCtrl);
+// app.use("/otp/", verifyAccessToken, otpCtrl);
 
 var port = process.env.PORT || 5000;
 app.listen(port, () => {

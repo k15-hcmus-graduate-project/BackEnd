@@ -1,45 +1,8 @@
 var md5 = require("crypto-js/md5");
 var kn = require("../fn/db");
 
-exports.list = () => kn.from("brand").select("*");
+exports.list = async () => await kn.from("category").select("*");
 
-exports.adminList = async query => {
-    const { keyword } = query.query;
-    var brands = [];
-    if (keyword)
-        brands = await kn
-            .from("brand")
-            .select("*")
-            .where("brand_name", "like", "%" + keyword + "%")
-            .limit(query.limit)
-            .offset(query.offset);
-    brands = await kn
-        .from("brand")
-        .select("*")
-        .limit(query.limit)
-        .offset(query.offset);
-    var size = await kn.from("brand").count("* as size");
-    return {
-        brands: brands,
-        totalItems: size[0].size
-    };
-};
-
-exports.update = brand => {
-    var id = brand.id;
-    delete brand.id;
-    var res = kn
-        .from("brand")
-        .update(brand)
-        .where("id", id);
-    return res;
-};
-
-exports.add = brand =>
-    kn
-        .from("brand")
-        .insert(brand)
-        .returning("id");
 // exports.single = uid =>
 //     kn("accounts")
 //         .select("uid", "username", "first_name", "last_name", "email", "phone", "role")

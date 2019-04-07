@@ -1,7 +1,17 @@
 var md5 = require("crypto-js/md5");
 var kn = require("../fn/db");
 
-exports.list = () => kn("users").select("uid", "username", "first_name", "last_name", "email", "phone", "role");
+exports.list = () =>
+    kn("accounts").select("id", "gender", "active", "username", "phone", "address", "permission", "fullName", "email", "dateOfBirth");
+
+exports.adminList = query =>
+    kn
+        .from("accounts")
+        .select("id", "username", "gender", "active", "phone", "address", "permission", "fullName", "email", "dateOfBirth")
+        .where("fullName", "like", "%" + query.query.keyword + "%")
+        .orWhere("username", "like", "%" + query.query.keyword + "%")
+        .offset(query.offset)
+        .limit(query.limit);
 
 exports.listCart = async id => {
     //get cart by id user
@@ -54,23 +64,15 @@ exports.listCart = async id => {
     return products;
 };
 
-exports.getCartByAccAndPro = (idAcc, idPro) =>
-    kn
-        .from("cart")
-        .select("*")
-        .where("accounts_id", idAcc)
-        .andWhere("product_id", idPro)
-        .first();
-
 exports.single = uid =>
     kn("accounts")
-        .select("id", "username", "fullName", "email", "phone", "address", "permission")
+        .select("id", "gender", "active", "username", "fullName", "email", "phone", "address", "permission")
         .where("id", uid)
         .first();
 
 exports.getUserByUsername = async username => {
     let user = await kn("accounts")
-        .select("id", "username", "phone", "address", "permission", "fullName", "email", "dateOfBirth")
+        .select("id", "username", "active", "gender", "phone", "address", "permission", "fullName", "email", "dateOfBirth")
         .where("username", username)
         .first();
     if (user) {
@@ -81,45 +83,47 @@ exports.getUserByUsername = async username => {
 
 exports.getUserByEmail = email =>
     kn("accounts")
-        .select("username", "phone", "address", "permission", "fullName", "email", "dateOfBirth")
+        .select("username", "gender", "active", "phone", "address", "permission", "fullName", "email", "dateOfBirth")
         .where("email", email)
         .first();
 
-exports.add = input => {
-    input.permission = "ADMIN";
+exports.add = async input => {
+    if (!input.permission) input.permission = "ADMIN";
     input.password = md5(input.password).toString();
-    return kn("accounts")
+    var res = await kn
+        .from("accounts")
         .insert(input)
         .returning("id");
+    return res;
 };
 
-exports.delete = uid =>
-    kn("users")
-        .where("uid", uid)
-        .del();
+// exports.delete = uid =>
+//     kn("users")
+//         .where("uid", uid)
+//         .del();
 
 exports.update = (uid, input) =>
-    kn("users")
-        .where("uid", uid)
+    kn
+        .from("accounts")
+        .where("id", uid)
         .update(input);
 
-exports.updateCart = (cartItem, amount) =>
-    kn
-        .from("cart")
-        .update("amount", amount)
-        .where("accounts_id", cartItem.accounts_id)
-        .andWhere("product_id", cartItem.product_id);
+// exports.deleteCart = id =>
+//     kn
+//         .from("cart")
+//         .del()
+//         .where("id", id);
 
-exports.insertCart = (idAcc, idPro, amount) =>
-    kn
-        .from("cart")
-        .insert({ accounts_id: idAcc, product_id: idPro, amount: amount })
-        .returning("id");
+// exports.insertCart = (idAcc, idPro, amount) =>
+//     kn
+//         .from("cart")
+//         .insert({ accounts_id: idAcc, product_id: idPro, amount: amount })
+//         .returning("id");
 
 exports.login = input => {
     var md5_pwd = md5(input.password).toString();
     return kn("accounts")
-        .select("id", "username", "fullName", "email", "phone", "permission")
+        .select("id", "username", "active", "gender", "fullName", "email", "phone", "permission")
         .where({
             username: input.username,
             password: md5_pwd

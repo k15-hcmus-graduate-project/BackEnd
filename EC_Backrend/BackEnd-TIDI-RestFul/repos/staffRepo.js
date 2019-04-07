@@ -7,6 +7,7 @@ exports.verifyStaff = async (req, res, next) => {
     if (access_token) {
         await jwt.verify(access_token, SECRET, async (err, payload) => {
             if (err) {
+                console.log(err);
                 res.statusCode = 401;
                 res.json({
                     code: 401,

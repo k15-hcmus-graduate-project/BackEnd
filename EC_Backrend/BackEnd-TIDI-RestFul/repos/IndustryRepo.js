@@ -1,6 +1,8 @@
 var md5 = require("crypto-js/md5");
 var kn = require("../fn/db");
 
+exports.list = () => kn.from("industry").select("*");
+
 exports.listTree = async () => {
     var ind = await kn.from("industry").select("*");
     let ind_copy = ind;

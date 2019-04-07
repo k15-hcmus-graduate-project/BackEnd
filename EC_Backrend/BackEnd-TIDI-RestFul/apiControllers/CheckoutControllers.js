@@ -2,6 +2,7 @@ var express = require("express");
 var verifier = require("email-verify");
 var checkoutRepo = require("../repos/CheckoutRepo");
 var userRepo = require("../repos/userRepo");
+var cartRepo = require("../repos/cartRepo");
 var verifyStaff = require("../repos/staffRepo").verifyStaff;
 
 var router = express.Router();
@@ -13,10 +14,11 @@ router.post("/couponStatus", verifyStaff, (req, res) => {
         .then(coupon => {
             console.log(coupon);
             if (coupon) {
-                if ((coupon.active = "TRUE")) {
+                if (coupon.active === "TRUE") {
                     coupon.status = 1;
                 } else {
                     coupon.status = 0;
+                    coupon.percent = coupon.money = 0;
                 }
                 res.json({
                     status: coupon.status,
@@ -39,31 +41,73 @@ router.post("/couponStatus", verifyStaff, (req, res) => {
 });
 
 router.post("/checkout", verifyStaff, (req, res) => {
-    console.log(req.body);
+    const { username, couponCode } = req.body;
     userRepo
-        .getUserByUsername(req.body.username)
+        .getUserByUsername(username)
         .then(user => {
+            //user í valid
             if (user) {
-                console.log(user);
-                req.body.idAccount = user.id;
-                if (req.body.couponCode && req.body.couponCode !== "") {
+                req.body.idAccount = user.id; // get id User
+                if (couponCode && couponCode !== "") {
                     checkoutRepo
-                        .getCouponStatus(req.body.coupon)
+                        .getCouponStatus(couponCode)
                         .then(coupon => {
+                            // coupon is valid
                             if (coupon) {
-                                req.body.couponId = coupon.id;
-                                checkoutRepo
-                                    .order(req.body)
-                                    .then(res => {
-                                        console.log(res);
+                                if (coupon.active !== "TRUE") {
+                                    res.json({
+                                        status: "FALSE",
+                                        message: "Coupon is not valid!!"
+                                    });
+                                    return;
+                                }
+                                req.body.idCoupon = coupon.id;
+                                cartRepo
+                                    .delByAccount(req.body.idAccount)
+                                    .then(del => {
+                                        console.log("after delete cart: ", del);
+                                        if (del && del > -1) {
+                                            checkoutRepo
+                                                .insertOrder(req.body)
+                                                .then(orderId => {
+                                                    if (orderId) {
+                                                        res.json({
+                                                            orderId: orderId,
+                                                            status: "TRUE",
+                                                            message: "Place order success with id order: " + orderId
+                                                        });
+                                                    } else {
+                                                        res.json({
+                                                            status: "FALSE",
+                                                            message: "Have error in place order process!!"
+                                                        });
+                                                    }
+                                                })
+                                                .catch(err2 => {
+                                                    console.log(err2);
+                                                    res.json({
+                                                        status: "FALSE",
+                                                        message: "Cannot place order."
+                                                    });
+                                                });
+                                        } else {
+                                            res.json({
+                                                status: false,
+                                                message: "Cannot delete cart by account."
+                                            });
+                                        }
                                     })
-                                    .catch(err2 => {
-                                        console.log(err2);
+                                    .catch(err5 => {
+                                        console.log("delete cart error");
+                                        res.json({
+                                            status: false,
+                                            message: "Error in delete cart process."
+                                        });
                                     });
                             } else {
                                 res.json({
                                     status: false,
-                                    message: "coupon is invalid"
+                                    message: "coupon is not valid"
                                 });
                             }
                         })
@@ -71,344 +115,177 @@ router.post("/checkout", verifyStaff, (req, res) => {
                             console.log(err1);
                             res.json({
                                 status: false,
-                                message: "checkout failure, check coupon code."
+                                message: "checkout failure, coupon is not valid."
                             });
                         });
                 } else {
+                    console.log("Khong co coupon. ");
+                    req.body.idCoupon = 0;
+                    cartRepo
+                        .delByAccount(req.body.idAccount)
+                        .then(del => {
+                            if (del) {
+                                checkoutRepo
+                                    .insertOrder(req.body)
+                                    .then(orderId => {
+                                        if (orderId) {
+                                            res.json({
+                                                orderId: orderId,
+                                                status: "TRUE",
+                                                message: "Place order success with id order: " + orderId
+                                            });
+                                        } else {
+                                            res.json({
+                                                status: "FALSE",
+                                                message: "Have error in place order process!!"
+                                            });
+                                        }
+                                    })
+                                    .catch(err2 => {
+                                        console.log(err2);
+                                        res.json({
+                                            status: "FALSE",
+                                            message: "Cannot place order."
+                                        });
+                                    });
+                            } else {
+                                res.json({
+                                    status: false,
+                                    message: "Cannot delete cart by account."
+                                });
+                            }
+                        })
+                        .catch(err5 => {
+                            console.log("delete cart error");
+                            res.json({
+                                status: false,
+                                message: "Cannot delete cart by account."
+                            });
+                        });
                 }
             } else {
                 res.json({
-                    status: false,
-                    message: "username is invalid"
+                    status: "FALSE",
+                    message: "username is not valid"
                 });
             }
         })
         .catch(err => {
             console.log(err);
             res.json({
-                status: false,
-                message: "checkout failure, check username."
+                status: "FALSE",
+                message: "Checkout failure, username can not be found!!"
             });
         });
-    // checkoutRepo
-    //     .getCouponStatus(req.body.coupon)
-    //     .then(coupon => {
-    //         console.log(coupon);
-    //         if (coupon) {
-    //             if ((coupon.active = "TRUE")) {
-    //                 coupon.status = 1;
-    //             } else {
-    //                 coupon.status = 0;
-    //             }
-    //             res.json({
-    //                 status: coupon.status,
-    //                 discPercent: coupon.percent,
-    //                 money: coupon.money
-    //             });
-    //         } else {
-    //             res.json({
-    //                 status: -1,
-    //                 discPercent: 0,
-    //                 money: 0
-    //             });
-    //         }
-    //     })
-    //     .catch(err => {
-    //         console.log(err);
-    //         res.statusCode = 500;
-    //         res.end("View error log on console");
-    //     });
 });
 
-router.get("/cart", verifyStaff, (req, res) => {
-    console.log("request get cart: ", req.query);
-    userRepo
-        .getUserByUsername(req.query.username)
-        .then(user => {
-            if (user) {
-                console.log("user cart: ", user);
-                userRepo
-                    .listCart(user.id)
-                    .then(rows => {
-                        console.log(rows);
-                        res.json({
-                            products: rows,
-                            status: true
-                        });
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        res.statusCode = 500;
-                        res.end("View error log on console");
-                    });
-            }
-        })
-        .catch(err => {
-            console.log(err);
-        });
-});
-router.post("/", (req, res) => {
-    console.log(req.body);
-    userRepo
-        .getUserByUsername(req.body.username)
-        .then(row => {
-            if (row) {
-                res.statusCode = 403;
+router.post("/admin/order", verifyStaff, (req, res) => {
+    console.log("Admin get all orders: ", req.body);
+    checkoutRepo
+        .listOrders(req.body)
+        .then(result => {
+            if (result.orders) {
                 res.json({
-                    code: 403,
-                    msg: `Username is already used!`
+                    orders: result.orders,
+                    totalItems: result.totalItems,
+                    status: "TRUE",
+                    message: "Get orders for admin successfully."
                 });
-            } else {
-                userRepo.getUserByEmail(req.body.email).then(row => {
-                    if (row) {
-                        res.statusCode = 403;
-                        res.json({
-                            code: 403,
-                            status: "FALSE",
-                            msg: `Email is already used!`
-                        });
-                    } else {
-                        userRepo.add(req.body).then(uid => {
-                            var access_token = authRepo.generateAccessToken(req.body);
-                            var refresh_token = authRepo.generateRefreshToken();
-                            if (uid) {
-                                authRepo.insertRefreshToken(uid, refresh_token).then(uid => {
-                                    res.json({ status: "TRUE", msg: `Added user!`, token: access_token, refreshToken: refresh_token });
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        })
-        .catch(err => {
-            console.log(err);
-            res.statusCode = 500;
-            res.end("View error log on console");
-        });
-});
-
-router.post("/cart", (req, res) => {
-    console.log(req.body);
-    userRepo
-        .getUserByUsername(req.body.username)
-        .then(row => {
-            if (row) {
-                const idAccount = row.id;
-                userRepo
-                    .getCartByAccAndPro(idAccount, req.body.productId)
-                    .then(cartItem => {
-                        console.log(cartItem);
-                        if (cartItem) {
-                            console.log("update cart ");
-                            userRepo
-                                .updateCart(cartItem, parseInt(req.body.amount))
-                                .then(effect => {
-                                    console.log(effect);
-                                    res.statusCode = 200;
-                                    res.json({
-                                        status: true,
-                                        code: 200,
-                                        msg: `update cart successful with id: ` + cartItem.accounts_id
-                                    });
-                                })
-                                .catch(err2 => {
-                                    console.log(err2);
-                                    res.statusCode = 403;
-                                    res.json({
-                                        status: false,
-                                        code: 403,
-                                        msg: `update cart failed with code 403!`
-                                    });
-                                });
-                        } else {
-                            console.log("insert cart");
-                            userRepo
-                                .insertCart(idAccount, req.body.productId, req.body.amount)
-                                .then(uid => {
-                                    res.status = 200;
-                                    res.json({
-                                        status: true,
-                                        code: 200,
-                                        msg: `insert cart successful with id: ` + uid
-                                    });
-                                })
-                                .catch(err3 => {
-                                    res.statusCode = 403;
-                                    res.json({
-                                        status: false,
-                                        code: 403,
-                                        msg: `insert cart failed with code 403!`
-                                    });
-                                    console.log(err3);
-                                });
-                        }
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        res.statusCode = 403;
-                        res.json({
-                            status: false,
-                            code: 403,
-                            msg: `Username is already used!`
-                        });
-                    });
-            } else {
-                console.log(err);
-                res.statusCode = 403;
+            } else
                 res.json({
-                    status: false,
-                    code: 403,
-                    msg: `Username is invalid!`
+                    orders: [],
+                    status: "FALSE",
+                    message: "Have error in get orders process. Check login and try again."
                 });
-            }
         })
         .catch(err => {
             console.log(err);
-            res.statusCode = 500;
-            res.end("View error log on console");
-        });
-});
-
-router.put("/cart", (req, res) => {
-    console.log("Update cart item with user: ", req.body.username);
-    userRepo
-        .getUserByUsername(req.body.username)
-        .then(row => {
-            if (row) {
-                const idAccount = row.id;
-                userRepo
-                    .getCartByAccAndPro(idAccount, req.body.productId)
-                    .then(cartItem => {
-                        console.log(cartItem);
-                        if (cartItem) {
-                            console.log("update cart ");
-                            userRepo
-                                .updateCart(cartItem, parseInt(req.body.amount))
-                                .then(effect => {
-                                    console.log(effect);
-                                    res.statusCode = 200;
-                                    res.json({
-                                        code: 200,
-                                        msg: `update cart successful with id: ` + cartItem.accounts_id
-                                    });
-                                })
-                                .catch(err2 => {
-                                    console.log(err2);
-                                    res.statusCode = 403;
-                                    res.json({
-                                        code: 403,
-                                        msg: `update cart failed with code 403!`
-                                    });
-                                });
-                        }
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        res.statusCode = 403;
-                        res.json({
-                            code: 403,
-                            msg: `Username is already used!`
-                        });
-                    });
-            } else {
-                console.log(err);
-                res.statusCode = 403;
-                res.json({
-                    code: 403,
-                    msg: `Username is invalid!`
-                });
-            }
-        })
-        .catch(err => {
-            console.log(err);
-            res.statusCode = 500;
-            res.end("View error log on console");
-        });
-});
-
-router.post("/login", (req, res) => {
-    //check account login
-    userRepo.login(req.body).then(row => {
-        if (row) {
-            console.log("after login: ", row);
-            var user_info = row;
-            var access_token = authRepo.generateAccessToken(user_info);
-            var refresh_token = authRepo.generateRefreshToken();
-            authRepo
-                .getRefreshToken(user_info.id)
-                .then(uid => {
-                    if (uid) {
-                        authRepo.updateRefreshToken(user_info.id, refresh_token).then(uid => {
-                            res.json({
-                                auth: true,
-                                user: user_info,
-                                authToken: access_token,
-                                refreshToken: refresh_token
-                            });
-                        });
-                    } else {
-                        authRepo.insertRefreshToken(user_info.id, refresh_token).then(uid => {
-                            res.json({
-                                auth: true,
-                                user: user_info,
-                                authToken: access_token,
-                                refreshToken: refresh_token
-                            });
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.log(err);
-                    res.statusCode = 500;
-                    res.end("View error log on console");
-                });
-        } else {
             res.json({
-                msg: `Failed to login!`
+                orders: [],
+                status: "FALSE",
+                message: "Have error in get orders process. Check login and try again."
             });
-        }
-    });
+        });
 });
 
-// router.get("/:id", verifyStaff, (req, res) => {
-//     console.log("get user verify: ", req.params);
-//     var id = +req.params.id;
-//     if (id) {
-//         userRepo
-//             .single(id)
-//             .then(row => {
-//                 res.json(row);
-//             })
-//             .catch(err => {
-//                 console.log(err);
-//                 res.statusCode = 500;
-//                 res.end("View error log on console");
-//             });
-//     } else {
-//         res.statusCode = 404;
-//         res.end("Not Found");
-//     }
-// });
-
-router.get("/one/:username", verifyStaff, (req, res) => {
-    console.log("get user verify: ", req.params);
-    var username = req.params.username;
-    if (username) {
-        userRepo
-            .getUserByUsername(username)
-            .then(row => {
-                res.json(row);
-            })
-            .catch(err => {
-                console.log(err);
-                res.statusCode = 500;
-                res.end("View error log on console");
+router.put("/admin/order", verifyStaff, (req, res) => {
+    console.log("Admin update orders: ", req.body);
+    checkoutRepo
+        .updateOrder(req.body)
+        .then(effect => {
+            if (effect) {
+                res.json({
+                    status: "TRUE",
+                    message: "Update order successfully."
+                });
+            } else
+                res.json({
+                    status: "FALSE",
+                    message: "Have error in get update process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                status: "FALSE",
+                message: "Have error in get update process. Check login and try again."
             });
-    } else {
-        res.statusCode = 404;
-        res.end("Not Found");
-    }
+        });
+});
+router.post("/order", verifyStaff, (req, res) => {
+    console.log("Get all orders: ", req.body);
+    checkoutRepo
+        .listOrders(req.body)
+        .then(result => {
+            if (result.orders) {
+                res.json({
+                    orders: result.orders,
+                    totalItems: result.totalItems,
+                    status: "TRUE",
+                    message: "Get orders successfully."
+                });
+            } else
+                res.json({
+                    orders: [],
+                    status: "FALSE",
+                    message: "Have error in get orders process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                orders: [],
+                status: "FALSE",
+                message: "Have error in get orders process. Check login and try again."
+            });
+        });
 });
 
+router.post("/order/orderdetail", verifyStaff, (req, res) => {
+    console.log("Get order details: ", req.body);
+    checkoutRepo
+        .getOrderDetail(req.body)
+        .then(result => {
+            if (result) {
+                res.json({
+                    order: result,
+                    status: "TRUE",
+                    message: "Get orderdetail successfully."
+                });
+            } else
+                res.json({
+                    order: null,
+                    status: "FALSE",
+                    message: "Have error in get orders process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                order: null,
+                status: "FALSE",
+                message: "Have error in get orders process. Check login and try again."
+            });
+        });
+});
 module.exports = router;
