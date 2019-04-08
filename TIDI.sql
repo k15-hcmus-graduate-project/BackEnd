@@ -38,10 +38,11 @@ CREATE TABLE `accounts` (
   `avatar` text,
   `isVerified` enum('TRUE','FALSE') DEFAULT 'FALSE',
   `active` enum('TRUE','FALSE') DEFAULT 'TRUE',
+  `refreshToken` varchar(90) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -50,7 +51,7 @@ CREATE TABLE `accounts` (
 
 LOCK TABLES `accounts` WRITE;
 /*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
-INSERT INTO `accounts` VALUES (1,'tuan','202cb962ac59075b964b07152d234b70','ADMIN','Nguyễn minh Tuấn','1997-10-21','MALE','0123456789','tuan@gmail.com','B','','FALSE','TRUE'),(2,'dat','202cb962ac59075b964b07152d234b70','ADMIN','Nguyễn minh Tuấn','1997-10-21','MALE','0123456789','dat@gmail.com','B','','FALSE','TRUE'),(3,'thanh','202cb962ac59075b964b07152d234b70','ADMIN','Nguyễn minh Tuấn','1997-10-21','MALE','0123456789','thanh@gmail.com','B','','FALSE','TRUE'),(8,'admin','b0baee9d279d34fa1dfd71aadb908c3f','ADMIN','Quang Nguyen','1111-11-11',NULL,NULL,'naonguyennguyen@gmail.com','','','FALSE','TRUE');
+INSERT INTO `accounts` VALUES (1,'tuanrr','202cb962ac59075b964b07152d234b70','ADMIN','Nguyễn minh Tuấn','1997-10-21','MALE','0123456789','tuan@gmail.com','B','','FALSE','FALSE',NULL),(2,'dat','202cb962ac59075b964b07152d234b70','ADMIN','Nguyễn minh Tuấn','1997-10-21','MALE','0123456789','dat@gmail.com','B','','FALSE','FALSE',NULL),(3,'thanh','202cb962ac59075b964b07152d234b70','ADMIN','Nguyễn minh Tuấn','1997-10-21','MALE','0123456789','thanh@gmail.com','B','','FALSE','TRUE',NULL),(22,'admin','b59c67bf196a4758191e42f76670ceba','ADMIN','Quang Nguyen','2211-02-04','MALE','033434333','naonguyennguyen@gmail.com','182 le dai hanh','','FALSE','FALSE','L0MMNrc9TRDpHDcGWzTSFXq4fE8zZOxjALPbXrVyDbreqBqmioUooeiHDY6mAIf4h19F6nBU2NZo780J'),(23,'quangnd2','b59c67bf196a4758191e42f76670ceba','ADMIN','Quang Nguyen','1997-03-28','MALE','0398242876','nguyendangquangkt@gmail.com','48/11 nguyen van cu, q5, tp HCM','','FALSE','TRUE','BFVHGxMKOr55i6ZucfmA3b6NzRFoj3fUQcqQL2t48kLXtQdUpiWECXPBU88d2grJIrTqky01CBuyStuv');
 /*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -94,7 +95,7 @@ CREATE TABLE `brand` (
   `brand_name` varchar(100) CHARACTER SET utf8 NOT NULL,
   `active` enum('TRUE','FALSE') DEFAULT 'TRUE',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -103,7 +104,7 @@ CREATE TABLE `brand` (
 
 LOCK TABLES `brand` WRITE;
 /*!40000 ALTER TABLE `brand` DISABLE KEYS */;
-INSERT INTO `brand` VALUES (1,'Apple','TRUE'),(2,'Samsung','TRUE'),(3,'Huawei','TRUE'),(4,'Oppo','TRUE'),(5,'Xiaomi','TRUE'),(6,'Nokia','TRUE'),(7,'Dell','TRUE'),(8,'Asus','TRUE'),(9,'Lenovo','TRUE'),(10,'MacBook','TRUE'),(11,'Acer','TRUE'),(12,'HP','TRUE'),(13,'Sony','TRUE'),(14,'LG','TRUE'),(15,'Panasonic','TRUE'),(16,'Toshiba','TRUE'),(17,'Canon','TRUE'),(18,'Nikon','TRUE'),(19,'Pixel','TRUE'),(20,'Nestle','TRUE'),(21,'Meizan','TRUE'),(22,'Acecook','TRUE'),(23,'Chinsu','TRUE'),(24,'Knorr','TRUE'),(25,'Sanest','TRUE'),(26,'Bibica','TRUE'),(27,'Coca-cola','TRUE'),(28,'Miliket','TRUE'),(29,'Sunlight','TRUE'),(30,'Omo','TRUE'),(31,'Comfort','TRUE'),(32,'Bitis','TRUE'),(33,'Nike','TRUE'),(34,'Adidas','TRUE'),(35,'Converse','TRUE'),(36,'Điện Quang','TRUE'),(37,'Nippon','TRUE'),(38,'Sunhouse','TRUE'),(39,'Puppy','TRUE'),(40,'Tottosi','TRUE'),(41,'Cuckeo Kids','TRUE'),(42,'Honda','TRUE'),(43,'Yamaha','TRUE'),(44,'Vinfast','TRUE'),(45,'Toyota','TRUE'),(46,'BWM','TRUE'),(47,'Lamborgini','TRUE'),(48,'Nhà xuất bản trẻ','TRUE'),(49,'Nhà xuất bản văn học','TRUE'),(50,'Nhà xuất bản Kim Đồng','TRUE'),(51,'Nhã Nam','TRUE'),(52,'First News','TRUE'),(53,'Phương Nam','TRUE'),(54,'Fujifilm','TRUE'),(55,'Poca','TRUE'),(56,'Bento','TRUE');
+INSERT INTO `brand` VALUES (1,'Apple 456','FALSE'),(2,'Samsung','TRUE'),(3,'Huawei','TRUE'),(4,'Oppo','TRUE'),(5,'Xiaomi','TRUE'),(6,'Nokia','TRUE'),(7,'Dell','TRUE'),(8,'Asus','TRUE'),(9,'Lenovo','TRUE'),(10,'MacBook','TRUE'),(11,'Acer','TRUE'),(12,'HP','TRUE'),(13,'Sony','TRUE'),(14,'LG','TRUE'),(15,'Panasonic','TRUE'),(16,'Toshiba','TRUE'),(17,'Canon','TRUE'),(18,'Nikon','TRUE'),(19,'Pixel','TRUE'),(20,'Nestle','TRUE'),(21,'Meizan','TRUE'),(22,'Acecook','TRUE'),(23,'Chinsu','TRUE'),(24,'Knorr','TRUE'),(25,'Sanest','TRUE'),(26,'Bibica','TRUE'),(27,'Coca-cola','TRUE'),(28,'Miliket','TRUE'),(29,'Sunlight','TRUE'),(30,'Omo','TRUE'),(31,'Comfort','TRUE'),(32,'Bitis','TRUE'),(33,'Nike','TRUE'),(34,'Adidas','TRUE'),(35,'Converse','TRUE'),(36,'Điện Quang','TRUE'),(37,'Nippon','TRUE'),(38,'Sunhouse','TRUE'),(39,'Puppy','TRUE'),(40,'Tottosi','TRUE'),(41,'Cuckeo Kids','TRUE'),(42,'Honda','TRUE'),(43,'Yamaha','TRUE'),(44,'Vinfast','TRUE'),(45,'Toyota','TRUE'),(46,'BWM','TRUE'),(47,'Lamborgini','TRUE'),(48,'Nhà xuất bản trẻ','TRUE'),(49,'Nhà xuất bản văn học','TRUE'),(50,'Nhà xuất bản Kim Đồng','TRUE'),(51,'Nhã Nam','TRUE'),(52,'First News','TRUE'),(53,'Phương Nam','TRUE'),(54,'Fujifilm','TRUE'),(55,'Poca','TRUE'),(56,'Bento','TRUE'),(57,'quang brand','FALSE');
 /*!40000 ALTER TABLE `brand` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -152,7 +153,7 @@ CREATE TABLE `cart` (
   KEY `product_id` (`product_id`),
   CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`),
   CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -161,6 +162,7 @@ CREATE TABLE `cart` (
 
 LOCK TABLES `cart` WRITE;
 /*!40000 ALTER TABLE `cart` DISABLE KEYS */;
+INSERT INTO `cart` VALUES (11,23,1,3),(12,23,8,1);
 /*!40000 ALTER TABLE `cart` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -252,7 +254,7 @@ CREATE TABLE `coupon` (
 
 LOCK TABLES `coupon` WRITE;
 /*!40000 ALTER TABLE `coupon` DISABLE KEYS */;
-INSERT INTO `coupon` VALUES (1,1,'0',0,0,0,'TRUE',-1,'TRUE');
+INSERT INTO `coupon` VALUES (1,1,'0',0.1,0,0,'TRUE',-1,'FALSE');
 /*!40000 ALTER TABLE `coupon` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -327,18 +329,18 @@ CREATE TABLE `orders` (
   `address` varchar(300) NOT NULL,
   `total` int(10) unsigned NOT NULL,
   `coupon_id` int(10) unsigned NOT NULL,
-  `statuss` enum('CHECKED','PACKING','SHIPPING','CANCELED','SUCCESSFUL','PENDING','') NOT NULL,
+  `status` enum('CHECKED','PACKING','SHIPPING','CANCELED','SUCCESSFUL','PENDING','') NOT NULL,
   `note` varchar(200) DEFAULT NULL,
   `zalopay_token` text,
   `zptransid` mediumtext,
   `apptransid` varchar(20) DEFAULT NULL,
   `active` enum('TRUE','FALSE') DEFAULT 'TRUE',
+  `date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `accounts_id` (`accounts_id`),
   KEY `coupon_id` (`coupon_id`),
-  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`),
-  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`coupon_id`) REFERENCES `coupon` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -347,6 +349,7 @@ CREATE TABLE `orders` (
 
 LOCK TABLES `orders` WRITE;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
+INSERT INTO `orders` VALUES (19,22,'Quang Nguyen','033434333','naonguyennguyen@gmail.com','182 le dai hanh',58560000,0,'PACKING','',NULL,NULL,NULL,'TRUE','2019-04-07 11:35:38');
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -360,13 +363,13 @@ DROP TABLE IF EXISTS `orders_history`;
 CREATE TABLE `orders_history` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `orders_id` int(10) unsigned NOT NULL,
-  `statuss` enum('CHECKED','PACKING','SHIPPING','CANCELED','SUCCESSFUL','PENDING','') NOT NULL,
+  `status` enum('CHECKED','PACKING','SHIPPING','CANCELED','SUCCESSFUL','PENDING','') NOT NULL,
   `date_time` datetime NOT NULL,
   `active` enum('TRUE','FALSE') DEFAULT 'TRUE',
   PRIMARY KEY (`id`),
   KEY `orders_id` (`orders_id`),
   CONSTRAINT `orders_history_ibfk_1` FOREIGN KEY (`orders_id`) REFERENCES `orders` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -375,6 +378,7 @@ CREATE TABLE `orders_history` (
 
 LOCK TABLES `orders_history` WRITE;
 /*!40000 ALTER TABLE `orders_history` DISABLE KEYS */;
+INSERT INTO `orders_history` VALUES (2,19,'CHECKED','2019-04-07 11:35:38','TRUE'),(3,19,'PACKING','2019-04-07 11:50:54','TRUE');
 /*!40000 ALTER TABLE `orders_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -398,7 +402,7 @@ CREATE TABLE `ordersdetail` (
   KEY `orders_id` (`orders_id`),
   CONSTRAINT `ordersdetail_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
   CONSTRAINT `ordersdetail_ibfk_2` FOREIGN KEY (`orders_id`) REFERENCES `orders` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -407,6 +411,7 @@ CREATE TABLE `ordersdetail` (
 
 LOCK TABLES `ordersdetail` WRITE;
 /*!40000 ALTER TABLE `ordersdetail` DISABLE KEYS */;
+INSERT INTO `ordersdetail` VALUES (40,19,1,1,23490000,23490000,'TRUE'),(41,19,2,1,26080000,26080000,'TRUE'),(42,19,3,1,8990000,8990000,'TRUE');
 /*!40000 ALTER TABLE `ordersdetail` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -430,6 +435,7 @@ CREATE TABLE `product` (
   `long_description` longtext,
   `images` text,
   `active` enum('TRUE','FALSE') DEFAULT 'TRUE',
+  `discPercent` int(11) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `brand_id` (`brand_id`),
   KEY `branch_id` (`branch_id`),
@@ -439,7 +445,7 @@ CREATE TABLE `product` (
   CONSTRAINT `product_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`),
   CONSTRAINT `product_ibfk_3` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`),
   CONSTRAINT `product_ibfk_4` FOREIGN KEY (`industry_id`) REFERENCES `industry` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -448,7 +454,7 @@ CREATE TABLE `product` (
 
 LOCK TABLES `product` WRITE;
 /*!40000 ALTER TABLE `product` DISABLE KEYS */;
-INSERT INTO `product` VALUES (1,'Điện Thoại iPhone X 64GB VN/A - Hàng Chính Hãng',23490000,100,2,1,1,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/1a/f0/a2/0978d091d83849160e6d31945ce9ae08.jpg\",\"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE'),(2,'Điện Thoại Samsung Galaxy Note 9 (512GB/8GB)',26080000,100,1,1,1,2,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/99/b8/b2/af43806dd7a682ce11870eed4af3c30d.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE'),(3,'iPad Wifi Cellular 32GB New 2017',8990000,100,5,2,1,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/4/_/4.u2769.d20170624.t083902.754667.jpg\",\"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE'),(4,'Máy Tính Bảng Samsung Galaxy Tab A6 7.0 (SM-T285)',3130000,100,6,2,1,2,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/ca/8c/8b/5b84d915aae910c3317efbf5ade0d9b7.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE'),(5,'Điện Thoại iPhone 6 32GB VN/A (Vàng Đồng)',6490000,100,2,1,1,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/a1/7f/84/b6b4d9f9c19642795ff73969f8ff485d.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE'),(6,'Apple iPhone 7 128GB',12990000,100,2,1,1,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/1/_/1.u2769.d20170403.t142544.139039.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE'),(7,'Điện Thoại Samsung Galaxy J8 (32GB/3GB)',5190000,100,1,1,1,2,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/73/53/ae/b1ae1c4079cea44d3342aadfdd055690.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE'),(8,'MacBook Pro Touch Bar 2018 Core i7/512GB (15 inch)',64990000,100,8,3,2,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/bb/05/0d/eb1de7935771377583d308855628b424.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE'),(9,'MacBook Pro Touch Bar 2018 Core i7/256GB (15 inch)',54990000,100,8,3,2,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/c4/c0/19/38481d69ece4140665378d13895ac89b.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE'),(10,'Smart Tivi Samsung 88 inch QLED QA88Q9FAMKXXV',429000000,100,25,7,3,2,'','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/0/_/0.u2769.d20170602.t171814.558377.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/2/_/2.u2769.d20170602.t171814.629388.jpg\"]','TRUE'),(11,'Android Tivi Sony 4K 75 inch KD-75X9000E',94900000,100,26,7,3,13,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/0/_/0.u5488.d20170728.t134942.646437.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/4/_/4.u5488.d20170728.t134942.880520.jpg\"]','TRUE'),(12,'Smart Tivi Cong 4K Samsung 65 inch UA65KS9000',94900000,100,25,7,3,2,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/s/a/samsung%2065%20inch%20ua65ks9000_1.u2470.d20160523.t144119.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/s/a/samsung%2065%20inch%20ua65ks9000_1_3.u2470.d20160523.t144119.jpg\"]','TRUE'),(13,'Máy Ảnh Sony RX100 IV',22990000,100,30,9,4,13,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/s/o/sony_dsc_rx100_mark_4_digital_1436371587000_1159879.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/1/4/1436371239000_img_503621.jpg\"]','TRUE'),(14,'Máy Ảnh Canon IXUS 190',4400000,100,30,9,4,13,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/i/x/ixus-190-den-0.u2751.d20170327.t114232.381508.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/i/x/ixus-190-den-3.u2751.d20170327.t114232.485998.jpg\"]','TRUE'),(15,'Máy Ảnh Lấy Liền Fujifilm Instax SQUARE SQ10 (Trắng)',6990000,100,31,9,4,54,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/5b/34/6f/a8921996626695c3b61fd5f045eb84ed.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/62/3d/69/fbd16ec9a20072dc615e13667a49013b.jpg\"]','TRUE'),(16,'Máy Ảnh Selfie Lấy Liền Fujifilm Instax Mini 9',1900000,100,31,9,4,54,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/m/i/mini9_ice-blue_01_md.u5168.d20170608.t122753.944199.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/m/i/mini9_ice-blue_10_md.u5168.d20170608.t122754.257180.jpg\"]','TRUE'),(17,'Snack Poca Khoai Tây Wavy Vị Bò Bít Tết Manhattan',21000,100,47,14,5,55,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/e4/c4/5e/a3d37bf2558e648d9913152696bb0a63.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/2/_/2.u2409.d20171016.t105532.912044.jpg\"]','TRUE'),(18,'Snack Mực Tẩm Gia Vị Thái Bento (24g)',25000,100,47,14,5,56,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/1/_/1.u2409.d20171016.t173952.35134.jpg\",\"https://salt.tikicdn.com/media/catalog/product/2/_/2.u2409.d20171016.t173952.78556.jpg\"]','TRUE'),(19,'Socola Viên Milo Nuggets (30g)',14000,100,50,14,5,20,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/c9/c0/9c/8b518597b17a1d230da6a8ea2f1815da.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/31/c6/f3/9653f62a642eaefd02b920b5cd8474d7.jpg\"]','TRUE'),(20,'Lốc 6 Chai Nước Giải Khát Coca-Cola Vị Cà Phê (390ml / Chai)',50000,100,44,13,5,27,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/b0/f5/04/cf88b34bfc70c9daf3de37a1d49091a6.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/b0/83/00/3cae54c83c742267118cb1cc0a6f94c0.jpg\"]','TRUE'),(21,'Thùng 24 Lon Nước Giải Khát Coca-Cola Vị Cà Phê (330ml / Lon)',232000,100,44,13,5,27,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/3e/a1/f2/eda2c02035b527a6a490bf8f46efaa44.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/21/65/02/31fb5e549bd028889f7fd184ba1ca84a.jpg\"]','TRUE'),(22,'Tương Cà Chin-Su (250g)',12000,100,40,12,5,23,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/b1/85/e6/7ff47967a85f7d77e2d80baaf63b5f0b.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/91/f4/5c/5caad978dd8f2b35b5d9bbe02e05891e.jpg\"]','TRUE'),(23,'Nước Tương Chin-Su (250ml)',12000,100,40,12,5,23,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/2e/4a/2d/84a6ecd3170886fd7885e57ef038e916.jpg\",\"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE'),(24,'Knorr Gia Vị Hoàn Chỉnh Thịt Kho (28g)',6000,100,40,12,5,24,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/ed/cb/4a/8db35486417dd3f532ccf0bbd458b841.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/1/4/1460766.jpg\"]','TRUE'),(25,'Combo 6 Gói Knorr Gia Vị Hoàn Chỉnh Thịt Kho (28g)',36000,100,40,12,5,24,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/75/d0/46/cc0a987b911c67f32e1267d2053ac1da.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/54/51/ae/d64740cf890cc5dfac1fa9518d8a3a48.jpg\"]','TRUE'),(26,'Giày Chạy Bộ Nữ Nike Air Relentless 6 MSL 843883-001 - Đen',1700000,100,97,15,6,33,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/72/b3/60/00553d7851799a32eb50f675d0588836.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/c2/ca/3e/f4edd019ea38413d705333c384714de0.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/7a/75/ed/0d9c26535bf74e6d1919cf4c24d54565.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/02/ce/c9/088b33cedd6bca730bbc177f312b303f.jpg\"]','TRUE'),(27,'Giày Thể Thao Nam Nike CK Racer 916780-403 - Xanh Đen',2120000,100,97,15,6,33,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/7c/55/10/98e221562e3c4b80ddc1cd9613ae7d23.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/74/01/93/36c5953cb65015bacc3ea5f03c0d32f5.jpg\"]','TRUE');
+INSERT INTO `product` VALUES (1,'Điện Thoại iPhone X 64GB VN/A - Hàng Chính Hãng',23490000,10011,6,1,2,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/1a/f0/a2/0978d091d83849160e6d31945ce9ae08.jpg\",\"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE',0),(2,'Điện Thoại Samsung Galaxy Note 9 (512GB/8GB)',26080000,100,1,1,1,2,'Mang lại sự cải tiến đặc biệt trong cây bút S-Pen, siêu phẩm Samsung Galaxy Note 9 còn sở hữu dung lượng pin khủng lên tới 4.000 mAh cùng hiệu năng mạnh mẽ vượt bậc, xứng đáng là một trong những chiếc điện thoại cao cấp nhất của Samsung.','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/99/b8/b2/af43806dd7a682ce11870eed4af3c30d.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE',0),(3,'iPad Wifi Cellular 32GB New 2017',8990000,100,5,2,1,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/4/_/4.u2769.d20170624.t083902.754667.jpg\",\"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE',0),(4,'Máy Tính Bảng Samsung Galaxy Tab A6 7.0 (SM-T285)',3130000,100,6,2,1,2,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/ca/8c/8b/5b84d915aae910c3317efbf5ade0d9b7.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE',0),(5,'Điện Thoại iPhone 6 32GB VN/A (Vàng Đồng)',6490000,100,2,1,1,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/a1/7f/84/b6b4d9f9c19642795ff73969f8ff485d.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE',0),(6,'Apple iPhone 7 128GB',12990000,100,2,1,1,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/1/_/1.u2769.d20170403.t142544.139039.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE',0),(7,'Điện Thoại Samsung Galaxy J8 (32GB/3GB)',5190000,100,1,1,1,2,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/73/53/ae/b1ae1c4079cea44d3342aadfdd055690.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE',0),(8,'MacBook Pro Touch Bar 2018 Core i7/512GB (15 inch)',64990000,100,8,3,2,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/bb/05/0d/eb1de7935771377583d308855628b424.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE',0),(9,'MacBook Pro Touch Bar 2018 Core i7/256GB (15 inch)',54990000,100,8,3,2,1,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/c4/c0/19/38481d69ece4140665378d13895ac89b.jpg\", \"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE',0),(10,'Smart Tivi Samsung 88 inch QLED QA88Q9FAMKXXV',429000000,100,25,7,3,2,'','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/0/_/0.u2769.d20170602.t171814.558377.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/2/_/2.u2769.d20170602.t171814.629388.jpg\"]','TRUE',0),(11,'Android Tivi Sony 4K 75 inch KD-75X9000E',94900000,100,26,7,3,13,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/0/_/0.u5488.d20170728.t134942.646437.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/4/_/4.u5488.d20170728.t134942.880520.jpg\"]','TRUE',0),(12,'Smart Tivi Cong 4K Samsung 65 inch UA65KS9000',94900000,100,25,7,3,2,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/s/a/samsung%2065%20inch%20ua65ks9000_1.u2470.d20160523.t144119.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/s/a/samsung%2065%20inch%20ua65ks9000_1_3.u2470.d20160523.t144119.jpg\"]','TRUE',0),(13,'Máy Ảnh Sony RX100 IV',22990000,100,30,9,4,13,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/s/o/sony_dsc_rx100_mark_4_digital_1436371587000_1159879.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/1/4/1436371239000_img_503621.jpg\"]','TRUE',0),(14,'Máy Ảnh Canon IXUS 190',4400000,100,30,9,4,13,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/i/x/ixus-190-den-0.u2751.d20170327.t114232.381508.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/i/x/ixus-190-den-3.u2751.d20170327.t114232.485998.jpg\"]','TRUE',0),(15,'Máy Ảnh Lấy Liền Fujifilm Instax SQUARE SQ10 (Trắng)',6990000,100,31,9,4,54,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/5b/34/6f/a8921996626695c3b61fd5f045eb84ed.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/62/3d/69/fbd16ec9a20072dc615e13667a49013b.jpg\"]','TRUE',0),(16,'Máy Ảnh Selfie Lấy Liền Fujifilm Instax Mini 9',1900000,100,31,9,4,54,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/m/i/mini9_ice-blue_01_md.u5168.d20170608.t122753.944199.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/m/i/mini9_ice-blue_10_md.u5168.d20170608.t122754.257180.jpg\"]','TRUE',0),(17,'Snack Poca Khoai Tây Wavy Vị Bò Bít Tết Manhattan',21000,100,47,14,5,55,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/e4/c4/5e/a3d37bf2558e648d9913152696bb0a63.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/2/_/2.u2409.d20171016.t105532.912044.jpg\"]','TRUE',0),(18,'Snack Mực Tẩm Gia Vị Thái Bento (24g)',25000,100,47,14,5,56,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/1/_/1.u2409.d20171016.t173952.35134.jpg\",\"https://salt.tikicdn.com/media/catalog/product/2/_/2.u2409.d20171016.t173952.78556.jpg\"]','TRUE',0),(19,'Socola Viên Milo Nuggets (30g)',14000,100,50,14,5,20,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/c9/c0/9c/8b518597b17a1d230da6a8ea2f1815da.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/31/c6/f3/9653f62a642eaefd02b920b5cd8474d7.jpg\"]','TRUE',0),(20,'Lốc 6 Chai Nước Giải Khát Coca-Cola Vị Cà Phê (390ml / Chai)',50000,100,44,13,5,27,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/b0/f5/04/cf88b34bfc70c9daf3de37a1d49091a6.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/b0/83/00/3cae54c83c742267118cb1cc0a6f94c0.jpg\"]','TRUE',0),(21,'Thùng 24 Lon Nước Giải Khát Coca-Cola Vị Cà Phê (330ml / Lon)',232000,100,44,13,5,27,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/3e/a1/f2/eda2c02035b527a6a490bf8f46efaa44.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/21/65/02/31fb5e549bd028889f7fd184ba1ca84a.jpg\"]','FALSE',0),(22,'Tương Cà Chin-Su (250g)',12000,100,40,12,5,23,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/b1/85/e6/7ff47967a85f7d77e2d80baaf63b5f0b.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/91/f4/5c/5caad978dd8f2b35b5d9bbe02e05891e.jpg\"]','TRUE',0),(23,'Nước Tương Chin-Su (250ml)',12000,100,40,12,5,23,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/2e/4a/2d/84a6ecd3170886fd7885e57ef038e916.jpg\",\"http://bpoc.com/wp-content/uploads/2016/08/Tidi-Products-Logo.jpg\"]','TRUE',0),(24,'Knorr Gia Vị Hoàn Chỉnh Thịt Kho (28g)',6000,100,40,12,5,24,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/ed/cb/4a/8db35486417dd3f532ccf0bbd458b841.jpg\",\"https://salt.tikicdn.com/cache/w1200/media/catalog/product/1/4/1460766.jpg\"]','TRUE',0),(25,'Combo 6 Gói Knorr Gia Vị Hoàn Chỉnh Thịt Kho (28g)',36000,100,40,12,5,24,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/75/d0/46/cc0a987b911c67f32e1267d2053ac1da.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/54/51/ae/d64740cf890cc5dfac1fa9518d8a3a48.jpg\"]','TRUE',0),(26,'Giày Chạy Bộ Nữ Nike Air Relentless 6 MSL 843883-001 - Đen',1700000,100,97,15,6,33,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/72/b3/60/00553d7851799a32eb50f675d0588836.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/c2/ca/3e/f4edd019ea38413d705333c384714de0.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/7a/75/ed/0d9c26535bf74e6d1919cf4c24d54565.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/02/ce/c9/088b33cedd6bca730bbc177f312b303f.jpg\"]','FALSE',0),(27,'Giày Thể Thao Nam Nike CK Racer 916780-403 - Xanh Đen',2120000,100,97,15,6,33,'1\n2\n3','','[\"https://salt.tikicdn.com/cache/w1200/ts/product/7c/55/10/98e221562e3c4b80ddc1cd9613ae7d23.jpg\",\"https://salt.tikicdn.com/cache/w1200/ts/product/74/01/93/36c5953cb65015bacc3ea5f03c0d32f5.jpg\"]','TRUE',0),(28,'mot hai ba',11,1111,30,10,4,1,'wwwwwwwwwwwwwwwwwwwww',NULL,'[\"https://www.twsf.com.tw/taipei/images/default.jpg\"]','TRUE',0),(29,'12345',1212,1212121,1,1,2,1,'qqqqqqqqqqq',NULL,'[\"https://www.twsf.com.tw/taipei/images/default.jpg\"]','TRUE',0),(30,'update dang quang',1212,1121,1,22,8,3,'ddddddddddddddddd',NULL,'[\"https://www.twsf.com.tw/taipei/images/default.jpg\"]','TRUE',0);
 /*!40000 ALTER TABLE `product` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -495,4 +501,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-03-17 15:05:56
+-- Dump completed on 2019-04-08 11:26:06
