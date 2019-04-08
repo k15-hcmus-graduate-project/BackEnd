@@ -8,6 +8,11 @@ var productRepo = require("../repos/ProductRepo");
 
 var authRepo = require("../repos/authRepo");
 var verifyStaff = require("../repos/staffRepo").verifyStaff;
+var lqc = require("../fn/liveQueryClient");
+
+const Parse = lqc.Parse;
+const client = lqc.LiveQueryClient;
+const Product = Parse.Object.extend("product");
 
 var router = express.Router();
 
@@ -166,6 +171,32 @@ router.post("/one", (req, res) => {
         productRepo
             .single(id)
             .then(row => {
+                var parseQuery = new Parse.Query("product");
+                parseQuery.equalTo("id", parseInt(id), 10);
+                var subscription = client.subscribe(parseQuery);
+                subscription.on('create', (object) => {
+                    console.log('object created');
+                });
+            
+                subscription.on('update', (object) => {
+                    console.log('object updated');
+                });
+            
+                subscription.on('enter', (object) => {
+                    console.log('object entered');
+                });
+            
+                subscription.on('leave', (object) => {
+                    console.log('object left');
+                });
+            
+                subscription.on('delete', (object) => {
+                    console.log('object deleted');
+                });
+            
+                subscription.on('close', () => {
+                    console.log('subscription closed');
+                });
                 res.json(row);
             })
             .catch(err => {
