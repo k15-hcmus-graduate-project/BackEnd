@@ -1,18 +1,15 @@
 var express = require("express");
 var verifier = require("email-verify");
-
 var industryRepo = require("../repos/IndustryRepo");
 var brandRepo = require("../repos/BrandRepo");
 var branchRepo = require("../repos/BranchRepo");
+var categoryRepo = require("../repos/CategoryRepo");
 var productRepo = require("../repos/ProductRepo");
-
 var authRepo = require("../repos/authRepo");
 var verifyStaff = require("../repos/staffRepo").verifyStaff;
-
 var parseConfig = require("../fn/parse");
 var Parse = parseConfig.Parse;
 var client = parseConfig.LiveQueryClient;
-
 var router = express.Router();
 
 var subscription;
@@ -60,22 +57,30 @@ router.get("/brand", (req, res) => {
             res.end("View error log on console");
         });
 });
-
 router.put("/viewer", async (req, res) => {
+    console.log("update decrease viewer: ", req.body);
     var id = req.body.id;
     var parseQuery = new Parse.Query("product");
-    parseQuery.equalTo("id", parseInt(id, 10));
-    var parseObj = await parseQuery.first();
-    parseObj.set("viewer", parseObj.get("viewer") - 1);
-    parseObj.save().then(
-        result => {
-            console.log("Tru luong view thanh cong");
-        },
-        error => {
-            console.log("Tru luong view that bai");
-        }
-    );
-    client.unsubscribe(subscription);
+    await parseQuery.equalTo("id", parseInt(id, 10));
+    parseQuery
+        .first()
+        .then(async object => {
+            const deViewer = parseInt(object.get("viewer"), 10) - 1;
+            object.set("viewer", deViewer);
+            object.save().then(
+                result => {
+                    console.log("Tru luong view thanh cong: ", result.get("viewer"));
+                },
+                error => {
+                    console.log("Tru luong view that bai: ", err);
+                }
+            );
+        })
+        .catch(err => {
+            console.log("Tru luong view that bai: ", err);
+        });
+
+    // client.unsubscribe(subscription);
 });
 router.post("/all", (req, res) => {
     console.log("get product with query: ", req.query);
@@ -91,117 +96,17 @@ router.post("/all", (req, res) => {
             console.log(err);
         });
 });
-
-router.post("/", (req, res) => {
-    console.log(req.body);
-    verifier.verify(req.body.email, function(err, info) {
-        if (err || !info.success) {
-            res.statusCode = 403;
-            res.json({
-                msg: `Invalid email!`
-            });
-        } else {
-            console.log("email valid");
-            userRepo
-                .getUserByUsername(req.body.username)
-                .then(row => {
-                    if (row) {
-                        res.statusCode = 403;
-                        res.json({
-                            msg: `Username is already used!`
-                        });
-                    } else {
-                        userRepo.getUserByEmail(req.body.email).then(row => {
-                            if (row) {
-                                res.statusCode = 403;
-                                res.json({
-                                    msg: `Email is already used!`
-                                });
-                            } else {
-                                userRepo.add(req.body).then(uid => {
-                                    if (uid) {
-                                        res.json({
-                                            msg: `Added user!`
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.log(err);
-                    res.statusCode = 500;
-                    res.end("View error log on console");
-                });
-        }
-    });
-});
-
-router.post("/login", (req, res) => {
-    //check account login
-    userRepo.login(req.body).then(row => {
-        if (row) {
-            var user_info = row;
-            var access_token = authRepo.generateAccessToken(user_info);
-            var refresh_token = authRepo.generateRefreshToken();
-            authRepo
-                .getRefreshToken(user_info.uid)
-                .then(uid => {
-                    if (uid) {
-                        authRepo.updateRefreshToken(user_info.uid, refresh_token).then(uid => {
-                            res.json({
-                                auth: true,
-                                user: user_info,
-                                access_token: access_token,
-                                refresh_token: refresh_token
-                            });
-                        });
-                    } else {
-                        authRepo.insertRefreshToken(user_info.uid, refresh_token).then(uid => {
-                            res.json({
-                                auth: true,
-                                user: user_info,
-                                access_token: access_token,
-                                refresh_token: refresh_token
-                            });
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.log(err);
-                    res.statusCode = 500;
-                    res.end("View error log on console");
-                });
-        } else {
-            res.json({
-                msg: `Failed to login!`
-            });
-        }
-    });
-});
+const sleep = ms => new Promise(r => setTimeout(() => r(), ms));
 
 router.post("/one", (req, res) => {
-    console.log(req.query);
     var id = +req.query.id;
     if (id) {
         productRepo
-            .single(id)
-            .then(row => {
-                console.log(row);
-                SyncProductWithBack4App(row);
-                var parseQuery = new Parse.Query("product");
-                parseQuery.equalTo("id", parseInt(id, 10));
-                subscription = client.subscribe(parseQuery);
-
-                subscription.on("update", object => {
-                    row.amount = object.get("amount");
-                    row.viewer = object.get("viewer");
-                    console.log("Amount updated: " + row.amount);
-                    console.log("Viewers: " + row.viewer);
-                    //res.json(row);
-                });
-
+            .single(id) // get product by id
+            .then(async row => {
+                // get ọnect product
+                await sleep(800);
+                SyncProductWithBack4App(row); // đồng bộ dữ liệu số người view lên back4app, đây là luồng riêng
                 res.json(row);
             })
             .catch(err => {
@@ -211,24 +116,329 @@ router.post("/one", (req, res) => {
             });
     } else {
         res.statusCode = 404;
-        res.end("Not Found");
+        res.end("Not Found, product id is not valid, please check your product.");
     }
 });
 
-async function SyncProductWithBack4App(pro) {
-    var parseQuery = new Parse.Query("product");
-    parseQuery.equalTo("id", parseInt(pro.id, 10));
-    var parseObj = await parseQuery.first();
-    parseObj.set("amount", pro.amount);
-    parseObj.set("viewer", parseObj.get("viewer") + 1);
-    parseObj.save().then(
-        result => {
-            console.log("Syncing successfully");
-        },
-        error => {
-            console.log(error.message);
-        }
-    );
-}
+const SyncProductWithBack4App = pro => {
+    var parseQuery = new Parse.Query("product"); // get query conn ti product class
+    parseQuery.equalTo("id", parseInt(pro.id, 10)); // get product having id = proId
+    if (parseQuery) {
+        parseQuery
+            .first()
+            .then(async object => {
+                object.set("amount", pro.amount); // đồng bộ số lượng dưới mysql với back4app
+                const inViewer = parseInt(object.get("viewer", 10));
+                console.log("get current view: ", inViewer);
+                // tăng số lượng người đang xem lên 1
+                object.set("viewer", inViewer + 1);
+                object
+                    .save()
+                    .then(result => {
+                        console.log("Syncing successfully, now viewer: ", result.get("viewer"));
+                    })
+                    .catch(err => {
+                        console.log("Sync Error", err);
+                    });
+            })
+            .catch(err1 => {
+                console.log("Sync Error", err1);
+            });
+    }
+};
 
+router.post("/admin/add", verifyStaff, (req, res) => {
+    console.log("Admin add product: ", req.body);
+    if (req.body) {
+        productRepo
+            .add(req.body)
+            .then(row => {
+                if (row) {
+                    res.json({
+                        status: "TRUE",
+                        message: "Insert product successfully with id" + row
+                    });
+                } else {
+                    res.json({
+                        status: "FALSE",
+                        message: "Insert product failed."
+                    });
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                res.json({
+                    status: "FALSE",
+                    message: "Insert product failed."
+                });
+            });
+    } else {
+        res.json({
+            status: "FALSE",
+            message: "Cannot add product. Check your data and try again."
+        });
+    }
+});
+
+router.post("/admin", verifyStaff, (req, res) => {
+    productRepo
+        .listForAdmin(req.body)
+        .then(rows => {
+            if (rows.products) {
+                productRepo
+                    .getDisAndCoupon(rows.products)
+                    .then(products => {
+                        // console.log("get discount product success: ", rows.totalItems);
+                        res.json({
+                            products: products,
+                            totalItems: rows.totalItems,
+                            status: "TRUE",
+                            message: "Get products successfully"
+                        });
+                    })
+                    .catch(err1 => {
+                        console.log("Have error: ", err1);
+                        res.json({
+                            products: [],
+                            status: "FALSE",
+                            message: "Have error in get prducts process. Check login and try again."
+                        });
+                    });
+            } else {
+                res.json({
+                    products: [],
+                    status: "FALSE",
+                    message: "Have error in get prducts process. Check login and try again."
+                });
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                products: [],
+                status: "FALSE",
+                message: "Have error in get prducts process. Check login and try again."
+            });
+        });
+});
+
+router.put("/admin", verifyStaff, (req, res) => {
+    console.log("update admin product: ", req.body);
+    productRepo
+        .updateProductAdmin(req.body)
+        .then(effect => {
+            console.log("result after admin update product: ", effect);
+            if (effect) {
+                res.json({
+                    status: "TRUE",
+                    message: "Update product by admin successfully."
+                });
+            } else {
+                res.json({
+                    status: "FALSE",
+                    message: "Update product by admin failed."
+                });
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                status: "FALSE",
+                message: "Cannot update product by admin!! Check login and try again."
+            });
+        });
+});
+router.post("/admin/brand", verifyStaff, (req, res) => {
+    console.log("Admin get all brand: ", req.body);
+    brandRepo
+        .list()
+        .then(brands => {
+            if (brands) {
+                res.json({
+                    brands: brands,
+                    totalItems: brands.length,
+                    status: "TRUE",
+                    message: "Get brands successfully."
+                });
+            } else
+                res.json({
+                    brands: [],
+                    status: "FALSE",
+                    message: "Have error in get brands process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                brands: [],
+                status: "FALSE",
+                message: "Have error in get brands process. Check login and try again."
+            });
+        });
+});
+
+router.post("/admin/brand/brand", verifyStaff, (req, res) => {
+    console.log("Admin get all brand for brand page: ", req.body);
+    brandRepo
+        .adminList(req.body)
+        .then(result => {
+            console.log("get brand brand for admin page: ", result);
+            if (result) {
+                res.json({
+                    brands: result.brands,
+                    totalItems: result.totalItems,
+                    status: "TRUE",
+                    message: "Get brands successfully."
+                });
+            } else
+                res.json({
+                    brands: [],
+                    status: "FALSE",
+                    message: "Have error in get brands process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                brands: [],
+                status: "FALSE",
+                message: "Have error in get brands process. Check login and try again."
+            });
+        });
+});
+router.post("/admin/brand/add", verifyStaff, (req, res) => {
+    console.log("Admin insert new brand: ", req.body);
+    brandRepo
+        .add(req.body)
+        .then(id => {
+            if (id) {
+                res.json({
+                    status: "TRUE",
+                    message: "Add brands successfully."
+                });
+            } else
+                res.json({
+                    status: "FALSE",
+                    message: "Have error in add brands process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                status: "FALSE",
+                message: "Have error in add brands process. Check login and try again."
+            });
+        });
+});
+router.put("/admin/brand", verifyStaff, (req, res) => {
+    console.log("Admin update brand: ", req.body);
+    brandRepo
+        .update(req.body)
+        .then(effect => {
+            if (effect) {
+                res.json({
+                    status: "TRUE",
+                    message: "Update brands successfully."
+                });
+            } else
+                res.json({
+                    status: "FALSE",
+                    message: "Have error in update brands process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                status: "FALSE",
+                message: "Have error in update brands process. Check login and try again."
+            });
+        });
+});
+
+router.post("/admin/industry", verifyStaff, (req, res) => {
+    // console.log("Admin get all industry: ", req.body);
+    industryRepo
+        .list()
+        .then(industries => {
+            if (industries) {
+                res.json({
+                    industries: industries,
+                    totalItems: industries.length,
+                    status: "TRUE",
+                    message: "Get industries successfully"
+                });
+            } else
+                res.json({
+                    industries: [],
+                    status: "FALSE",
+                    message: "Have error in get industries process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                industries: [],
+                status: "FALSE",
+                message: "Have error in get industries process. Check login and try again."
+            });
+        });
+});
+
+router.post("/admin/branch", verifyStaff, (req, res) => {
+    // console.log("Admin get all industry: ", req.body);
+    branchRepo
+        .list()
+        .then(branches => {
+            if (branches) {
+                res.json({
+                    branches: branches,
+                    totalItems: branches.length,
+                    status: "TRUE",
+                    message: "Get branch successfully"
+                });
+            } else
+                res.json({
+                    branches: [],
+                    status: "FALSE",
+                    message: "Have error in get branch process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                branches: [],
+                status: "FALSE",
+                message: "Have error in get branch process. Check login and try again."
+            });
+        });
+});
+
+router.post("/admin/category", verifyStaff, (req, res) => {
+    // console.log("Admin get all industry: ", req.body);
+    categoryRepo
+        .list()
+        .then(categories => {
+            if (categories) {
+                res.json({
+                    categories: categories,
+                    totalItems: categories.length,
+                    status: "TRUE",
+                    message: "Get category successfully"
+                });
+            } else
+                res.json({
+                    categories: [],
+                    status: "FALSE",
+                    message: "Have error in get category process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                categories: [],
+                status: "FALSE",
+                message: "Have error in get category process. Check login and try again."
+            });
+        });
+});
 module.exports = router;
