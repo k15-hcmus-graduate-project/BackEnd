@@ -105,7 +105,7 @@ router.post("/one", (req, res) => {
             .single(id) // get product by id
             .then(async row => {
                 // get ọnect product
-                await sleep(800);
+                await sleep(1200);
                 SyncProductWithBack4App(row); // đồng bộ dữ liệu số người view lên back4app, đây là luồng riêng
                 res.json(row);
             })

@@ -6,8 +6,8 @@ var instance = knex({
         host: process.env.MYSQL_HOST || "127.0.0.1",
         port: process.env.MYSQL_PORT || "3306",
         user: process.env.MYSQL_USER || "root",
-        password: process.env.MYSQL_PASSWORD || "123456",
-        database: process.env.MYSQL_DB || "tidi"
+        password: process.env.MYSQL_PASSWORD || "12345",
+        database: process.env.MYSQL_DB || "TIDI"
     },
     pool: { min: 0, max: 50 },
     charset: "utf8"

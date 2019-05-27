@@ -63,6 +63,44 @@ router.put("/", (req, res) => {
         });
 });
 
+router.put("/user", (req, res) => {
+    console.log("Update location item with user: ", req.body);
+    const { username, location } = req.body;
+    // const postion = JSON.stringify(location);
+    locationRepo
+        .updateUserLocation(username, location)
+        .then(row => {
+            res.json({
+                status: "TRUE",
+                message: "Update location is successfull!"
+            });
+        })
+        .catch(err => {
+            res.json({
+                status: "FALSE",
+                message: "Update location is failure!"
+            });
+        });
+});
+
+router.get("/user", (req, res) => {
+    // const postion = JSON.stringify(location);
+    locationRepo
+        .locationAccounts()
+        .then(row => {
+            res.json({
+                data: row,
+                status: "TRUE",
+                message: "get user location is successfull!"
+            });
+        })
+        .catch(err => {
+            res.json({
+                status: "FALSE",
+                message: "get user location is failure!"
+            });
+        });
+});
 router.delete("/", (req, res) => {
     console.log("Delete cart item with user: ", req.body.id);
     locationRepo

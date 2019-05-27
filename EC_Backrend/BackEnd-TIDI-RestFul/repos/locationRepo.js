@@ -2,6 +2,7 @@ var md5 = require("crypto-js/md5");
 var kn = require("../fn/db");
 
 exports.list = () => kn.select("*").from("address");
+exports.locationAccounts = () => kn.select("username", "location").from("accounts");
 
 exports.getById = id =>
     kn
@@ -15,6 +16,12 @@ exports.updateLocation = (id, location, distance) =>
         .from("address")
         .update({ location: location, distance: distance })
         .where("id", id);
+
+exports.updateUserLocation = (username, location) =>
+    kn
+        .from("accounts")
+        .update({ location: location })
+        .where("username", username);
 
 exports.delete = id =>
     kn
