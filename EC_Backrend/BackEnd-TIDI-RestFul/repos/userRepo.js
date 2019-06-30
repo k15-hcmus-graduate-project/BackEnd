@@ -88,7 +88,7 @@ exports.getUserByEmail = email =>
         .first();
 
 exports.add = async input => {
-    if (!input.permission) input.permission = "ADMIN";
+    if (!input.permission) input.permission = "CUSTOMER";
     input.password = md5(input.password).toString();
     var res = await kn
         .from("accounts")

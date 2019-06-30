@@ -4,7 +4,9 @@ var checkoutRepo = require("../repos/CheckoutRepo");
 var userRepo = require("../repos/userRepo");
 var cartRepo = require("../repos/cartRepo");
 var verifyStaff = require("../repos/staffRepo").verifyStaff;
-
+var parseConfig = require("../fn/parse");
+var Parse = parseConfig.Parse;
+var client = parseConfig.LiveQueryClient;
 var router = express.Router();
 
 router.post("/couponStatus", verifyStaff, (req, res) => {
@@ -68,9 +70,13 @@ router.post("/checkout", verifyStaff, (req, res) => {
                                         console.log("after delete cart: ", del);
                                         if (del && del > -1) {
                                             checkoutRepo
-                                                .insertOrder(req.body)
-                                                .then(orderId => {
+                                                .insertOrder(req.body, Parse)
+                                                .then(async orderId => {
                                                     if (orderId) {
+                                                        var parseQuery = new Parse.Object("orders");
+                                                        if (parseQuery) {
+                                                            checkoutRepo.insertOrderParseAdmin(parseQuery, orderId, req.body);
+                                                        }
                                                         res.json({
                                                             orderId: orderId,
                                                             status: "TRUE",
@@ -126,9 +132,13 @@ router.post("/checkout", verifyStaff, (req, res) => {
                         .then(del => {
                             if (del) {
                                 checkoutRepo
-                                    .insertOrder(req.body)
+                                    .insertOrder(req.body, Parse)
                                     .then(orderId => {
                                         if (orderId) {
+                                            var parseQuery = new Parse.Object("orders");
+                                            if (parseQuery) {
+                                                checkoutRepo.insertOrderParseAdmin(parseQuery, orderId, req.body);
+                                            }
                                             res.json({
                                                 orderId: orderId,
                                                 status: "TRUE",
@@ -210,10 +220,21 @@ router.post("/admin/order", verifyStaff, (req, res) => {
 
 router.put("/admin/order", verifyStaff, (req, res) => {
     console.log("Admin update orders: ", req.body);
+    const id = req.body.orderId;
     checkoutRepo
         .updateOrder(req.body)
-        .then(effect => {
+        .then(async effect => {
+            console.log("effect update order: ", effect);
             if (effect) {
+                var parseQuery = new Parse.Query("orders");
+                if (id) {
+                    await parseQuery.equalTo("uid", parseInt(id, 10));
+                    if (parseQuery) {
+                        var result = await checkoutRepo.updateOrderAdminParseServer(parseQuery, id, req.body);
+                        console.log("result update order: ", result);
+                    }
+                }
+
                 res.json({
                     status: "TRUE",
                     message: "Update order successfully."

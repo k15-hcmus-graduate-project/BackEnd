@@ -57,16 +57,17 @@ router.get("/brand", (req, res) => {
             res.end("View error log on console");
         });
 });
-router.put("/viewer", async (req, res) => {
+router.put("/viewer", (req, res) => {
     console.log("update decrease viewer: ", req.body);
     var id = req.body.id;
     var parseQuery = new Parse.Query("product");
-    await parseQuery.equalTo("id", parseInt(id, 10));
+    parseQuery.equalTo("id", parseInt(id, 10));
     parseQuery
         .first()
         .then(async object => {
-            const deViewer = parseInt(object.get("viewer"), 10) - 1;
-            object.set("viewer", deViewer);
+            const curView = object.get("viewer");
+            console.log("now viewer: ", curView);
+            object.set("viewer", curView - 1);
             object.save().then(
                 result => {
                     console.log("Tru luong view thanh cong: ", result.get("viewer"));
@@ -103,10 +104,7 @@ router.post("/one", (req, res) => {
     if (id) {
         productRepo
             .single(id) // get product by id
-            .then(async row => {
-                // get ọnect product
-                await sleep(1200);
-                SyncProductWithBack4App(row); // đồng bộ dữ liệu số người view lên back4app, đây là luồng riêng
+            .then(row => {
                 res.json(row);
             })
             .catch(err => {
@@ -126,7 +124,7 @@ const SyncProductWithBack4App = pro => {
     if (parseQuery) {
         parseQuery
             .first()
-            .then(async object => {
+            .then(object => {
                 object.set("amount", pro.amount); // đồng bộ số lượng dưới mysql với back4app
                 const inViewer = parseInt(object.get("viewer", 10));
                 console.log("get current view: ", inViewer);
@@ -224,10 +222,17 @@ router.post("/admin", verifyStaff, (req, res) => {
 
 router.put("/admin", verifyStaff, (req, res) => {
     console.log("update admin product: ", req.body);
+    const { id } = req.body;
     productRepo
         .updateProductAdmin(req.body)
-        .then(effect => {
+        .then(async effect => {
             console.log("result after admin update product: ", effect);
+            var parseQuery = new Parse.Query("product");
+            await parseQuery.equalTo("id", parseInt(id, 10));
+            if (parseQuery) {
+                productRepo.updateProductAdminParse(parseQuery, req.body);
+            }
+
             if (effect) {
                 res.json({
                     status: "TRUE",
@@ -441,4 +446,89 @@ router.post("/admin/category", verifyStaff, (req, res) => {
             });
         });
 });
+
+router.get("/admin/store", verifyStaff, (req, res) => {
+    // console.log("Admin get all industry: ", req.body);
+    productRepo
+        .listStores()
+        .then(stores => {
+            if (stores) {
+                res.json({
+                    stores: stores,
+                    totalItems: stores.length,
+                    status: "TRUE",
+                    message: "Get stores successfully"
+                });
+            } else
+                res.json({
+                    stores: [],
+                    status: "FALSE",
+                    message: "Have error in get stores process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                stores: [],
+                status: "FALSE",
+                message: "Have error in get stores process. Check login and try again."
+            });
+        });
+});
+
+router.post("/admin/store", verifyStaff, (req, res) => {
+    console.log("Admin insert stores: ", req.body);
+    productRepo
+        .insertStore(req.body)
+        .then(id => {
+            if (id) {
+                res.json({
+                    status: "TRUE",
+                    message: "Insert stores successfully"
+                });
+            } else
+                res.json({
+                    status: "FALSE",
+                    message: "Have error in insert stores process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                stores: [],
+                status: "FALSE",
+                message: "Store name has been used. Please try with another name."
+            });
+        });
+});
+
+router.post("/admin/history", verifyStaff, (req, res) => {
+    console.log("Admin get all history: ", req.body);
+    productRepo
+        .history(req.body)
+        .then(history => {
+            if (history) {
+                res.json({
+                    history: history,
+                    totalItems: history.length,
+                    status: "TRUE",
+                    message: "Get history successfully"
+                });
+            } else
+                res.json({
+                    history: [],
+                    status: "FALSE",
+                    message: "Have error in get history process. Check login and try again."
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                stores: [],
+                status: "FALSE",
+                message: "Have error in get history process. Check login and try again."
+            });
+        });
+});
+
 module.exports = router;

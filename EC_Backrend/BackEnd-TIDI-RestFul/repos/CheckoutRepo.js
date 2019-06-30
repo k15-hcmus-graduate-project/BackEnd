@@ -46,8 +46,8 @@ exports.getOrderDetail = async query => {
     return order;
 };
 
-exports.insertOrder = async orderInfo => {
-    console.log("orderInfo: ", orderInfo);
+exports.insertOrder = async (orderInfo, Parse) => {
+    console.log("orderInfo: ", Parse);
     var date = new Date();
     var insertOrder = await kn
         .from("orders")
@@ -68,16 +68,68 @@ exports.insertOrder = async orderInfo => {
 
     console.log("id order: ", insertOrder);
     if (insertOrder) {
+        await kn
+            .from("orders")
+            .update({ uid: insertOrder })
+            .where("id", insertOrder);
+
+        var date = new Date();
         const { products } = orderInfo;
         products.map(async item => {
+            console.log("pro item: ", item);
             var insertDetails = await kn.from("ordersdetail").insert({
                 orders_id: insertOrder,
                 product_id: item.proID,
                 amount: item.amount,
                 original_price: item.price,
                 final_price: item.price,
-                active: true
+                active: true,
+                store: item.store,
+                created_date: date
             });
+
+            // update product sold number
+            var sold = await kn
+                .from("product")
+                .select("sold")
+                .where("id", item.proID)
+                .first();
+
+            console.log("sold: ", sold.sold);
+            const vl = parseInt(sold.sold, 10) + item.amount;
+            console.log("vl update: ", vl);
+            var resUpdate = await kn
+                .from("product")
+                .update({ sold: vl })
+                .where("id", item.proID);
+
+            var stock = await kn
+                .from("product")
+                .select("amount")
+                .where("id", item.proID)
+                .first();
+            let amountToUpdate = parseInt(stock.amount, 10) - item.amount;
+            stock = await kn
+                .from("product")
+                .update({ amount: amountToUpdate })
+                .where("id", item.proID);
+            console.log("amount pro after insert: ", stock);
+            var parseQuery = new Parse.Query("product");
+            await parseQuery.equalTo("id", item.proID);
+            if (parseQuery) {
+                parseQuery.first().then(object => {
+                    object.set("amount", amountToUpdate);
+                    object.set("changeAmount", true);
+                    object
+                        .save()
+                        .then(resPro => {
+                            console.log("update amount pro parse successful.");
+                        })
+                        .catch(errPro => {
+                            console.log("update pro amount parse fail.");
+                        });
+                });
+            }
         });
 
         var FirstHisOrder = await kn
@@ -101,6 +153,46 @@ exports.updateOrder = async query => {
         var date = new Date();
         return kn.from("orders_history").insert({ orders_id: id, status: query.status, date_time: date, active: "TRUE" });
     } else return null;
+};
+
+exports.updateOrderAdminParseServer = async (parseQuery, id, data) => {
+    console.log("data to update order parse: ", id, data, parseQuery);
+    await parseQuery
+        .first()
+        .then(async object => {
+            object.set("status", data.status);
+            await object
+                .save()
+                .then(result => {
+                    return true;
+                    console.log("save order admin successful");
+                })
+                .catch(err => {
+                    return false;
+                    console.log("cannot save to parse");
+                });
+        })
+        .catch(err => {
+            console.log("cannot connect to parse server to save order admin.");
+            return false;
+        });
+    return true;
+};
+
+exports.insertOrderParseAdmin = async (parseQuery, id, data) => {
+    console.log("insert data to parse: ", id[0], data);
+
+    parseQuery.set("uid", parseInt(id[0], 10));
+    parseQuery.set("username", data.username);
+    parseQuery.set("status", "PENDING");
+    parseQuery
+        .save()
+        .then(res => {
+            console.log("save order success: ", res);
+        })
+        .catch(err => {
+            console.log("cannot save order parse: ", err);
+        });
 };
 
 exports.listOrders = async query => {

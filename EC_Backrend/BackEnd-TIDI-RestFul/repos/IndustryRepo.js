@@ -5,6 +5,7 @@ exports.list = () => kn.from("industry").select("*");
 
 exports.listTree = async () => {
     var ind = await kn.from("industry").select("*");
+
     let ind_copy = ind;
 
     for (let i = 0; i < ind.length; i++) {

@@ -3,6 +3,9 @@ var verifier = require("email-verify");
 var userRepo = require("../repos/userRepo");
 var authRepo = require("../repos/authRepo");
 var verifyStaff = require("../repos/staffRepo").verifyStaff;
+var parseConfig = require("../fn/parse");
+var Parse = parseConfig.Parse;
+var client = parseConfig.LiveQueryClient;
 
 var router = express.Router();
 
@@ -102,8 +105,8 @@ router.post("/admin/add", verifyStaff, (req, res) => {
             });
         });
 });
-router.post("/", verifyStaff, (req, res) => {
-    console.log(req.body);
+router.post("/", (req, res) => {
+    console.log("new user: ", req.body, ", username: ", req.body.username);
     userRepo
         .getUserByUsername(req.body.username)
         .then(row => {
@@ -237,6 +240,29 @@ router.get("/one/:username", verifyStaff, (req, res) => {
         res.statusCode = 404;
         res.end("Not Found");
     }
+});
+router.put("/connect", (req, res) => {
+    console.log(req.body);
+    // const { option } = req.body;
+    var parseQuery = new Parse.Query("Connector");
+    parseQuery
+        .first()
+        .then(async object => {
+            const currentCount = parseInt(object.get("count"), 10);
+            object.set("count", currentCount - 1);
+            // option === 0 ? object.set("count", currentCount - 1) : object.set("count", currentCount + 1);
+            object.save().then(
+                result => {
+                    console.log("change user connect successful: ", result.get("count"));
+                },
+                error => {
+                    console.log("Change user connect failure: ", err);
+                }
+            );
+        })
+        .catch(err => {
+            console.log("Change user connect failure: ", err);
+        });
 });
 
 module.exports = router;

@@ -77,3 +77,21 @@ exports.insertCart = (idAcc, idPro, amount) =>
         .from("cart")
         .insert({ accounts_id: idAcc, product_id: idPro, amount: amount })
         .returning("id");
+
+exports.updateCart = async (cartItem, amount) => {
+    console.log("cart item: ", cartItem, "amount: ", amount);
+    var curAmount = await kn
+        .from("cart")
+        .select("amount")
+        .where("accounts_id", cartItem.accounts_id)
+        .andWhere("product_id", cartItem.product_id)
+        .first();
+    console.log("now amount: ", curAmount.amount);
+    var newAmount = parseInt(amount, 10);
+    await kn
+        .from("cart")
+        .update({ amount: newAmount })
+        .where("accounts_id", cartItem.accounts_id)
+        .andWhere("product_id", cartItem.product_id);
+    return 1;
+};

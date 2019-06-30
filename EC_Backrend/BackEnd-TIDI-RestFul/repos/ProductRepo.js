@@ -107,6 +107,20 @@ exports.listTree = async query => {
     return res;
 };
 
+exports.listStores = () => kn.select("*").from("address");
+
+exports.history = data =>
+    kn
+        .select("*")
+        .from("ordersdetail")
+        .where("product_id", data.id);
+
+exports.insertStore = data =>
+    kn
+        .from("address")
+        .insert({ name: data.store_name, address: data.store_address })
+        .returning("id");
+
 exports.listForAdmin = async query => {
     let ind = null;
     let totalSize = 0;
@@ -278,6 +292,59 @@ exports.updateProductAdmin = product => {
     return res;
 };
 
+exports.updateProductAdminParse = (parseQuery, product) => {
+    parseQuery
+        .first()
+        .then(object => {
+            console.log("get product parse admin update: ", object);
+            const {
+                product_name,
+                industry_id,
+                branch_id,
+                category_id,
+                brand_id,
+                price,
+                images,
+                description,
+                longDescription,
+                amount,
+                stock,
+                active,
+                last_updated,
+                updated_by
+            } = product;
+            product_name ? object.set("product_name", product_name) : null;
+            industry_id ? object.set("industry_id", industry_id) : null;
+            branch_id ? object.set("branch_id", branch_id) : null;
+            category_id ? object.set("category_id", category_id) : null;
+            brand_id ? object.set("brand_id", brand_id) : null;
+            price ? object.set("price", price) : null;
+            images ? object.set("images", images) : null;
+            description ? object.set("description", description) : null;
+            longDescription ? object.set("longDescription", longDescription) : null;
+            amount ? object.set("amount", amount) : null;
+            stock ? object.set("stock", stock) : null;
+            active ? object.set("active", active) : null;
+            last_updated ? object.set("last_updated", last_updated) : null;
+            updated_by ? object.set("updated_by", updated_by) : null;
+            object.set("update", "true");
+            object
+                .save()
+                .then(res => {
+                    console.log("update product admin on parse successful");
+                    return 1;
+                })
+                .catch(err => {
+                    console.log("cannot udpate product admin on parse: ", err);
+                    return 0;
+                });
+        })
+        .catch(errParse => {
+            console.log("error connect parse server: ", errParse);
+            return 0;
+        });
+    return 0;
+};
 exports.add = product =>
     kn
         .from("product")
